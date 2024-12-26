@@ -1,0 +1,25 @@
+@startuml
+participant "IYM Jobs"    as Jobs
+participant "Tieto CS"    as TCS
+participant "SAP"         as SAP
+
+==Открытие КА==
+activate SAP
+Jobs <-- SAP : Резульатат КЛ
+deactivate SAP
+activate Jobs
+note over Jobs
+Сначала здесь идет
+работа с КЛ
+end note
+Jobs -> SAP : Запрос на открытие КА
+activate SAP
+note over Jobs #SkyBlue
+Обновить **credit_cards_requests**
+на [credit_application_sent]
+end note
+<-- Jobs : Завершить
+deactivate Jobs
+==Получение КА==
+
+@enduml

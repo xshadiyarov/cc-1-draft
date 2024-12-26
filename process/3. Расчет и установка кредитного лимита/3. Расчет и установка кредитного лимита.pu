@@ -1,0 +1,120 @@
+@startuml
+actor       "Пользователь" as User
+participant "МП IYM"       as App
+participant "IYM Backend"  as BE
+participant "IYM Jobs"     as Jobs
+participant "Tieto CS"     as TCS
+participant "SAP"          as SAP
+
+==Проверка КЛ==
+User -> App : Экран КК
+activate User
+activate App
+App -> BE : Запрос виджетов экрана
+activate BE
+App <-- BE : Виджеты экрана КК
+deactivate BE
+User <-- App : Пререндер экрана КК
+App -> BE : Запрос имеющегося КЛ
+activate BE
+BE -> TCS : Запрос КЛ
+activate TCS
+note over TCS
+Проверка имеющегося
+КЛ на карте
+end note
+BE <-- TCS : Установленный КЛ
+deactivate TCS
+alt Установлен
+    alt Новая КК
+        note over BE #SkyBlue
+        Запись кредитного представ.
+        в **credit_cards** [какой пришел]
+        end note
+    end
+    BE -> TCS : Запрос на разбивку КЛ
+    activate TCS
+    BE <-- TCS : Разбивка КЛ
+    deactivate TCS
+    App <-- BE : Имеющийся КЛ на карте
+    User <-- App : Информаци о КЛ
+    deactivate User
+    deactivate App
+else Не установлен
+==Инициализация КЛ==
+note over BE #SkyBlue
+Запись в **credit_cards**
+[can_request]
+end note
+alt Авторасчет OFF
+    note over BE #SkyBlue
+    За авторасчет отвечает
+    **credit_card_get_limit_auto**
+    end note
+    App <-- BE : Информация о КЛ
+    deactivate BE
+    activate App 
+    User <-- App : Кнопка расчета КЛ
+    activate User
+    User -> App : Жмет на кнопку расчета
+    App -> BE : Запрос на расчет КЛ
+    activate BE
+else Авторасчет ON
+    BE -> BE : Метод на расчет КЛ
+end
+note over BE #SkyBlue
+Запись заявки в
+**credit_card_requests**
+[pending]
+end note
+BE -> Jobs : Рассчитать КЛ
+activate Jobs
+note over Jobs #SkyBlue
+Обновления **credit_cards**
+на [processing]
+end note
+BE <-- Jobs : Обновленное представ.
+App <-- BE : Информация о КЛ
+deactivate BE
+User <-- App : Состояние загрузки КЛ
+deactivate App
+deactivate User
+end
+==Расчет КЛ==
+activate Jobs
+Jobs -> SAP : Собрать/Вернуть КЛ
+deactivate Jobs
+activate SAP
+note over SAP
+За сумму КЛ в SAP
+отвечает **MAX_AMOUNT**
+end note
+Jobs <-- SAP : Резульатат КЛ
+deactivate SAP
+activate Jobs
+alt КЛ = 0
+    note over Jobs #SkyBlue
+    Обновить **credit_cards_requests**
+    на [rejected]
+    end note
+    note over Jobs #SkyBlue
+    Обновить **credit_cards**
+    на [0, not_approved]
+    end note
+else КЛ > 0
+    note over Jobs #SkyBlue
+    Обновить **credit_cards_requests**
+    на [approved]
+    end note
+    note over Jobs #SkyBlue
+    Обновить **credit_cards**
+    на [{КЛ}, paid]
+    end note
+    Jobs -> TCS : Установка КЛ
+else Нет ответа
+    Jobs -> : Ручной разбор
+end
+deactivate Jobs
+==Проверка КЛ==
+
+@enduml

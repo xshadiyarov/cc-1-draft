@@ -1,0 +1,43 @@
+@startuml
+participant "IYM Jobs"     as Jobs
+participant "Tieto CS"     as TCS
+participant "SAP"          as SAP
+
+==Расчет КЛ==
+activate Jobs
+Jobs -> SAP : Собрать/Вернуть КЛ
+deactivate Jobs
+activate SAP
+note over SAP
+За сумму КЛ в SAP
+отвечает **MAX_AMOUNT**
+end note
+Jobs <-- SAP : Резульатат КЛ
+deactivate SAP
+activate Jobs
+alt КЛ = 0
+    note over Jobs #SkyBlue
+    Обновить **credit_cards_requests**
+    на [rejected]
+    end note
+    note over Jobs #SkyBlue
+    Обновить **credit_cards**
+    на [0, not_approved]
+    end note
+else КЛ > 0
+    note over Jobs #SkyBlue
+    Обновить **credit_cards_requests**
+    на [approved]
+    end note
+    note over Jobs #SkyBlue
+    Обновить **credit_cards**
+    на [КЛ, paid]
+    end note
+    Jobs -> TCS : Установка КЛ
+else Нет ответа
+    Jobs -> : Ручной разбор
+end
+deactivate Jobs
+==Проверка КЛ==
+
+@enduml

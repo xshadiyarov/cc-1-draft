@@ -1,0 +1,19 @@
+@startuml
+actor       "Пользователь" as User
+participant "МП IYM"       as App
+participant "IYM Backend"  as BE
+
+==Сохранение заявки==
+BE <-- : Заявка на открытие
+activate BE
+note over BE #SkyBlue
+Сохранить заявку 
+в **users_applications**
+end note
+App <-- BE : Успешно принятая заявка
+deactivate BE
+activate App
+User <-- App : Заявка принята
+activate User
+
+@enduml

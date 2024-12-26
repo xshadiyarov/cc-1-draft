@@ -1,0 +1,41 @@
+@startuml
+participant "IYM Backend" as BE
+participant "ISBM"        as ISBM
+participant "NCI"         as CBS
+participant "Tieto CS"    as TCS
+participant "SAP"         as SAP
+
+==Обработка заявки==
+BE -> ISBM : Запрос на открытие карты
+activate ISBM
+ISBM -> CBS : Проверка на наличие клиента
+activate CBS
+ISBM <-- CBS : Ответ по проверке клиента
+alt Клиент найден
+    ISBM -> SAP : Признак активного счета
+    activate SAP
+else Клиент не найден
+    ISBM -> CBS : Запрос на открытие клиента
+    ISBM <-- CBS : ID клиента
+    deactivate CBS
+    ISBM -> SAP : Сохранение бизнес партнера
+    deactivate SAP
+end
+ISBM -> TCS : Проверка на наличие клиента
+activate TCS
+ISBM <-- TCS : Ответ по проверке клиента
+alt Клиент не найден
+    ISBM -> TCS : Запрос на открытие клиента
+    ISBM <-- TCS : Ответ об открытии клиента
+    deactivate TCS
+end
+ISBM -> TCS : Запрос на открытие карты
+activate TCS
+ISBM <-- TCS : Ответ об открытии карты
+BE <-- ISBM : Заявка на открытие
+deactivate ISBM
+TCS -> : Отправка на печать и доставку
+deactivate TCS
+==Сохранение заявки==
+
+@enduml

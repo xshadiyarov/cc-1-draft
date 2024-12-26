@@ -1,0 +1,49 @@
+@startuml
+actor       "Пользователь" as User
+participant "МП IYM"       as App
+participant "IYM Backend"  as BE
+participant "IYM Jobs"     as Jobs
+
+==Инициализация КЛ==
+activate BE
+note over BE #SkyBlue
+Запись в **credit_cards**
+[can_request]
+end note
+alt Авторасчет OFF
+    note over BE
+    За авторасчет отвечает
+    **credit_card_get_limit_auto**.
+    end note
+    App <-- BE : Информация о КЛ
+    deactivate BE
+    activate App 
+    User <-- App : Кнопка расчета КЛ
+    activate User
+    User -> App : Жмет на кнопку расчета
+    App -> BE : Запрос на расчет КЛ
+    activate BE
+else Авторасчет ON
+    BE -> BE : Метод на расчет КЛ
+end
+note over BE #SkyBlue
+Запись заявки в
+**credit_card_requests**
+[pending]
+end note
+BE -> Jobs : Рассчитать КЛ
+activate Jobs
+note over Jobs #SkyBlue
+Обновления **credit_cards**
+на [processing]
+end note
+BE <-- Jobs : Обновленное представ.
+deactivate Jobs
+App <-- BE : Информация о КЛ
+deactivate BE
+User <-- App : Состояние загрузки КЛ
+deactivate App
+deactivate User
+==Расчет КЛ==
+
+@enduml

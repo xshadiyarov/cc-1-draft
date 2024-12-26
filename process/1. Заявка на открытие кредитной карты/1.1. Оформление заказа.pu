@@ -1,0 +1,30 @@
+@startuml
+actor       "Пользователь" as User
+participant "МП IYM"       as App
+participant "IYM Backend"  as BE
+
+==Оформление заказа==
+User -> App : Услуга: "Заказать карту"
+activate User
+activate App
+App -> BE : Запрос карточных продуктов
+activate BE
+App <-- BE : Список карточных продуктов
+deactivate BE
+User <-- App : Экран выбора карты
+User -> App : Выбор КК
+User -> App : Детали доставки
+App -> BE : Запрос на выпуск карты
+activate BE
+App <-- BE : Оферта и номер тел.
+deactivate BE
+User <-- App : Диалог принятия оферты
+User -> App : Принятие оферты
+User -> App : Подтверждение OTP
+deactivate User
+App -> BE : Подтверждение заявки
+deactivate App
+activate BE
+==Обработка заявки==
+
+@enduml

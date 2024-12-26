@@ -1,0 +1,63 @@
+@startuml
+hide circle
+
+entity users_applications {
+  app_id
+  user_id
+  __
+  product_type
+  application_result
+}
+entity users_cards {
+  card_id
+  user_id
+  __
+  masked_pan
+  account
+}
+entity credit_cards {
+  id
+  card_id
+  __
+  state
+  credit_limit
+}
+entity credit_card_requests {
+  id
+  card_id
+  __
+  state
+  sap_response
+}
+
+users_cards::card_id <.left. credit_cards::card_id
+users_cards::card_id <.right. credit_card_requests::card_id
+
+note top of users_applications 
+Заявки пользователей.
+endnote
+note top of credit_cards
+Таблица кредитого
+представления карты.
+endnote
+note bottom of credit_cards
+state:
+- can_request
+- processing
+- not_approved
+- paid
+- in_grace_period
+- overdue
+endnote
+note top of credit_card_requests
+Заявки на расчет
+кредитного лимита.
+endnote
+note bottom of credit_card_requests
+state:
+- pending
+- rejected
+- cedit_application_sent
+- success
+endnote
+@enduml

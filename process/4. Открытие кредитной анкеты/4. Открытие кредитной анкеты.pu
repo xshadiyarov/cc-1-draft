@@ -1,0 +1,41 @@
+@startuml
+participant "IYM Backend" as BE
+participant "IYM Jobs"    as Jobs
+participant "Tieto CS"    as TCS
+participant "SAP"         as SAP
+
+==Открытие КА==
+activate SAP
+Jobs <-- SAP : Резульатат КЛ
+deactivate SAP
+activate Jobs
+note over Jobs
+Сначала здесь идет
+работа с КЛ
+end note
+Jobs -> SAP : Запрос на открытие КА
+activate SAP
+note over Jobs #SkyBlue
+Обновить **credit_cards_requests**
+на [credit_application_sent]
+end note
+<-- Jobs : Завершить
+deactivate Jobs
+==Получение КА==
+Jobs <-- SAP : Ответ об открытии КА
+deactivate SAP
+activate Jobs
+note over SAP
+Успешными являются
+**STATUS_CODE** 1, 3
+end note
+note over Jobs #SkyBlue
+Обновить **credit_cards_requests**
+на [success]
+end note
+Jobs -> TCS : Привязать ID КА к карте
+activate TCS
+<-- Jobs : Завершить
+deactivate Jobs
+
+@enduml

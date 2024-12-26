@@ -1,0 +1,46 @@
+@startuml
+actor       "Пользователь" as User
+participant "МП IYM"       as App
+participant "IYM Backend"  as BE
+participant "Tieto CS"     as TCS
+
+==Проверка КЛ==
+User -> App : Экран КК
+activate User
+activate App
+App -> BE : Запрос виджетов экрана
+activate BE
+App <-- BE : Виджеты экрана КК
+deactivate BE
+User <-- App : Пререндер экрана КК
+App -> BE : Запрос имеющегося КЛ
+activate BE
+BE -> TCS : Запрос КЛ
+activate TCS
+note over TCS
+Проверка имеющегося
+КЛ на карте
+end note
+BE <-- TCS : Установленный КЛ
+deactivate TCS
+alt Установлен
+    alt Новая КК
+        note over BE #SkyBlue
+        Запись кредитного представ.
+        в **credit_cards** [какой пришел]
+        end note
+    end
+    BE -> TCS : Запрос на разбивку КЛ
+    activate TCS
+    BE <-- TCS : Разбивка КЛ
+    deactivate TCS
+    App <-- BE : Имеющийся КЛ на карте
+    deactivate BE
+    User <-- App : Информаци о КЛ
+    deactivate User
+    deactivate App
+else Не установлен
+==Инициализация КЛ==
+end
+
+@enduml

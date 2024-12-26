@@ -1,0 +1,45 @@
+@startuml
+actor       "Пользователь" as User
+participant "МП IYM"       as App
+participant "IYM Backend"  as BE
+participant "IYM Jobs"     as Jobs
+
+==Подгрузка карт==
+User -> App : Открыть МП
+activate User
+activate App
+App -> BE : Запрос на ревизию
+activate BE
+App <-- BE : Временная метка ревизии
+BE -> BE : Проверка последней \nревизии карт
+note over BE
+Проверка по пользователю,
+его **user_id**
+end note
+alt > 10 мин.
+BE -> Jobs : Обновить карты \nпользователя
+deactivate BE
+end
+note over App
+МП локально хранит
+послед. метку
+end note
+App -> App : Сверка меток ревизии
+alt Нет совпадения
+    App -> BE : Запрос списка карт
+    activate BE
+    App <-- BE : Список карт
+end
+App -> BE : Запрос баланса карт
+note over BE
+Баланс всегда идет
+с ПЦ, упрощенно
+end note
+App <-- BE : Баланс карт
+deactivate BE
+User <-- App : Отображение карт
+deactivate App
+deactivate User
+==Внесение/Обновление карт==
+
+@enduml
